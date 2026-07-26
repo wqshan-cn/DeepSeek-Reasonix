@@ -1,0 +1,52 @@
+name: Build Windows test desktop
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: windows-amd64 unsigned test build
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: desktop/go.mod
+          cache: true
+          cache-dependency-path: desktop/go.sum
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      - name: Install NSIS
+        run: |
+          choco install nsis -y --no-progress
+          echo "C:\Program Files (x86)\NSIS" >> "$GITHUB_PATH"
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@v2.12.0
+
+      - name: Build unsigned test package
+        run: scripts/desktop-build.sh windows/amd64 "v0.0.0-test.${{ github.run_number }}" canary
+
+      - name: Upload Windows test package
+        uses: actions/upload-artifact@v7
+        with:
+          name: Reasonix-Windows-x64-test
+          path: |
+            dist/Reasonix-windows-amd64-installer.exe
+            dist/Reasonix-windows-amd64.zip
+          if-no-files-found: error
+          retention-days: 14
