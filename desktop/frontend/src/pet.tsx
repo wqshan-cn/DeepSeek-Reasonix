@@ -14,6 +14,7 @@ type PetPhase = "idle" | "thinking" | "working" | "input" | "approval" | "done" 
 type PetSession = {
   tabId: string;
   title: string;
+  status: string;
   phase: PetPhase;
   running?: boolean;
   waiting?: boolean;
@@ -123,24 +124,57 @@ function DesktopPet() {
 
   const phase = celebrating ? "done" : normalizePhase(state);
   const pack = useMemo(() => packs.find((item) => item.id === state.petId) ?? packs[0], [packs, state.petId]);
-  const openMain = () => void bindings()?.OpenMainWindow(state.tabId ?? "");
+  const visibleSessions = useMemo(() => {
+    const priority = (session: PetSession) =>
+      session.phase === "approval" ? 6 :
+      session.phase === "input" ? 5 :
+      session.phase === "error" ? 4 :
+      session.running ? 3 :
+      session.tabId === state.tabId ? 2 : 1;
+    const relevant = (state.sessions ?? []).filter(
+      (session) => session.running || session.waiting || session.tabId === state.tabId,
+    );
+    return [...relevant]
+      .sort((left, right) => priority(right) - priority(left))
+      .slice(0, 3);
+  }, [state.sessions, state.tabId]);
+  const openMain = (tabId = state.tabId ?? "") => void bindings()?.OpenMainWindow(tabId);
 
   return (
     <main className={`pet-stage pet-stage--${phase}${collapsed ? " pet-stage--collapsed" : ""}`}>
       {!collapsed && (
-        <button className="pet-bubble" type="button" onClick={openMain} title="点击返回对应对话">
-          <strong>{state.title || "Reasonix"}</strong>
-          <span className="pet-bubble__status">{state.status || "等待任务"}</span>
-          {(state.activeCount ?? 0) > 1 && (
-            <small>
-              {state.activeCount} 个任务进行中
-              {(state.attentionCount ?? 0) > 0 ? ` · ${state.attentionCount} 个需要处理` : ""}
-            </small>
+        <section className={`pet-bubble${visibleSessions.length > 1 ? " pet-bubble--multi" : ""}`} aria-label="Reasonix 任务状态">
+          <button className="pet-bubble__primary" type="button" onClick={() => openMain()} title="点击返回当前对话">
+            <strong>{state.title || "Reasonix"}</strong>
+            <span className="pet-bubble__status">{state.status || "等待任务"}</span>
+            {((state.activeCount ?? 0) > 1 || (state.attentionCount ?? 0) > 0) && (
+              <small>
+                {state.activeCount ?? 0} 个任务进行中
+                {(state.attentionCount ?? 0) > 0 ? ` · ${state.attentionCount} 个需要处理` : ""}
+              </small>
+            )}
+          </button>
+          {visibleSessions.length > 1 && (
+            <div className="pet-task-list">
+              {visibleSessions.map((session) => (
+                <button
+                  key={session.tabId}
+                  className={`pet-task pet-task--${session.phase}`}
+                  type="button"
+                  onClick={() => openMain(session.tabId)}
+                  title={`打开：${session.title}`}
+                >
+                  <span className="pet-task__dot" aria-hidden="true" />
+                  <span className="pet-task__title">{session.title}</span>
+                  <span className="pet-task__status">{session.status}</span>
+                </button>
+              ))}
+            </div>
           )}
-        </button>
+        </section>
       )}
 
-      <button className="pet-character" type="button" onClick={openMain} title="返回 Reasonix 对话">
+      <button className="pet-character" type="button" onClick={() => openMain()} title="返回 Reasonix 对话">
         {pack?.kind === "codex-spritesheet" && pack.assetUrl ? (
           <span
             key={`${pack.id}-${phase}`}

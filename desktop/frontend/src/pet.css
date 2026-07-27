@@ -27,17 +27,30 @@ button { font: inherit; }
   left: 14px;
   width: 438px;
   min-height: 72px;
-  padding: 14px 24px;
+  padding: 0;
   border: 1px solid rgb(255 255 255 / 78%);
   border-radius: 38px;
   background: linear-gradient(145deg, rgb(255 255 255 / 97%), rgb(237 242 251 / 94%));
   color: #182033;
   display: grid;
-  gap: 4px;
   text-align: left;
   box-shadow: 0 14px 38px rgb(20 35 70 / 27%);
-  cursor: pointer;
   --wails-draggable: no-drag;
+}
+.pet-bubble--multi { width: 330px; }
+
+.pet-bubble__primary {
+  width: 100%;
+  min-height: 70px;
+  padding: 14px 24px;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  cursor: pointer;
 }
 
 .pet-bubble strong,
@@ -55,6 +68,52 @@ button { font: inherit; }
 .pet-stage--input .pet-bubble__status { color: #d97706; }
 .pet-stage--error .pet-bubble__status { color: #dc2626; }
 .pet-stage--done .pet-bubble__status { color: #059669; }
+
+.pet-task-list {
+  display: grid;
+  padding: 0 12px 10px;
+}
+
+.pet-task {
+  min-width: 0;
+  height: 31px;
+  padding: 0 10px;
+  border: 0;
+  border-top: 1px solid rgb(92 108 138 / 12%);
+  background: transparent;
+  color: #4b5568;
+  display: grid;
+  grid-template-columns: 8px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pet-task:hover { background: rgb(98 116 150 / 7%); }
+.pet-task__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #9ca3af;
+}
+.pet-task--working .pet-task__dot,
+.pet-task--thinking .pet-task__dot { background: #3b82f6; animation: pet-dot-pulse 1s ease-in-out infinite; }
+.pet-task--approval .pet-task__dot,
+.pet-task--input .pet-task__dot { background: #f59e0b; animation: pet-dot-pulse .72s ease-in-out infinite; }
+.pet-task--done .pet-task__dot { background: #10b981; }
+.pet-task--error .pet-task__dot { background: #ef4444; }
+.pet-task__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.pet-task__status {
+  color: #8a93a5;
+  font-size: 11px;
+  white-space: nowrap;
+}
 
 .pet-character {
   position: absolute;
@@ -152,6 +211,9 @@ button { font: inherit; }
 @keyframes pet-error {
   25% { transform: translateX(-5px); }
   75% { transform: translateX(5px); }
+}
+@keyframes pet-dot-pulse {
+  50% { opacity: .35; transform: scale(.72); }
 }
 
 @media (prefers-reduced-motion: reduce) {

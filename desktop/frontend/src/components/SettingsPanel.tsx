@@ -5428,15 +5428,17 @@ function AppearanceSection({
   const themeOptions: Theme[] = ["auto", "light", "dark"];
   const [desktopPetPacks, setDesktopPetPacks] = useState<Array<{ id: string; displayName: string; description: string }>>([]);
   const [desktopPetID, setDesktopPetID] = useState("akita");
+  const [desktopPetEnabled, setDesktopPetEnabledState] = useState(true);
   const availableFontFamilies = useMemo(() => getAvailableFontFamilies(fontFamily), [fontFamily]);
   const availableMonoFontFamilies = useMemo(() => getAvailableMonoFontFamilies(monoFontFamily), [monoFontFamily]);
   useEffect(() => {
     let cancelled = false;
-    void Promise.all([app.ListDesktopPetPacks(), app.DesktopPetPreference()])
-      .then(([packs, selected]) => {
+    void Promise.all([app.ListDesktopPetPacks(), app.DesktopPetPreference(), app.DesktopPetEnabled()])
+      .then(([packs, selected, enabled]) => {
         if (cancelled) return;
         setDesktopPetPacks(packs);
         setDesktopPetID(selected || "akita");
+        setDesktopPetEnabledState(enabled);
       })
       .catch(() => undefined);
     return () => {
@@ -5459,6 +5461,28 @@ function AppearanceSection({
         </div>
       </SettingsField>
       <SettingsField label="桌宠（Pets）" stacked>
+        <div className="set-seg">
+          <button
+            type="button"
+            className={`set-seg__btn${desktopPetEnabled ? " set-seg__btn--on" : ""}`}
+            onClick={() => {
+              setDesktopPetEnabledState(true);
+              void app.SetDesktopPetEnabled(true).catch(() => setDesktopPetEnabledState(false));
+            }}
+          >
+            开启桌宠
+          </button>
+          <button
+            type="button"
+            className={`set-seg__btn${!desktopPetEnabled ? " set-seg__btn--on" : ""}`}
+            onClick={() => {
+              setDesktopPetEnabledState(false);
+              void app.SetDesktopPetEnabled(false).catch(() => setDesktopPetEnabledState(true));
+            }}
+          >
+            关闭桌宠
+          </button>
+        </div>
         <div className="theme-card-grid">
           {desktopPetPacks.map((pet) => (
             <button
@@ -5470,7 +5494,9 @@ function AppearanceSection({
               onClick={() => {
                 setDesktopPetID(pet.id);
                 void app.SetDesktopPetPreference(pet.id)
-                  .then(() => app.StartDesktopPet())
+                  .then(() => {
+                    if (desktopPetEnabled) return app.StartDesktopPet();
+                  })
                   .catch(() => undefined);
               }}
             >

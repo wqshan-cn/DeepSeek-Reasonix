@@ -233,7 +233,7 @@ function WindowsWindowControls() {
         type="button"
         aria-label="Open desktop pet"
         title="打开桌宠"
-        onClick={() => void app.StartDesktopPet()}
+        onClick={() => void app.SetDesktopPetEnabled(true)}
       >
         <Cat size={13} strokeWidth={1.9} />
       </button>
@@ -1293,16 +1293,32 @@ export default function App() {
     [activeTabId, tabMetas],
   );
   useEffect(() => {
+    void app.DesktopPetEnabled()
+      .then((enabled) => {
+        if (enabled) return app.StartDesktopPet();
+      })
+      .catch(() => undefined);
+  }, []);
+  useEffect(() => {
+    const activeHasConversation = state.items.some((item) => item.kind === "user" || item.kind === "assistant");
     const sessions = tabMetas.map((tab) => {
       const isActive = tab.id === activeTabId || tab.active;
       const approval = isActive && Boolean(state.approval);
       const input = isActive && Boolean(state.ask);
       const waiting = approval || input || Boolean(tab.pendingPrompt);
-      const running = isActive ? Boolean(state.running) : Boolean(tab.running);
-      const phase = approval ? "approval" : input || waiting ? "input" : running ? "working" : "idle";
+      const running = isActive ? Boolean(state.running) : Boolean(tab.running || tab.backgroundJobs);
+      const hasConversation = isActive ? activeHasConversation : Boolean(tab.topicTitle || tab.label);
+      const phase = approval ? "approval" : input || waiting ? "input" : running ? "working" : hasConversation ? "done" : "idle";
+      const status =
+        approval ? "等待权限确认" :
+        input || waiting ? "等待你的回复" :
+        running ? "正在处理任务" :
+        hasConversation ? "任务已完成" :
+        "等待任务";
       return {
         tabId: tab.id,
         title: tab.topicTitle || tab.label || tab.workspaceName || "Reasonix",
+        status,
         phase,
         running,
         waiting,
@@ -1313,6 +1329,7 @@ export default function App() {
     const selected = [...sessions].sort((left, right) => priority(right) - priority(left))[0] ?? {
       tabId: activeTabId || "",
       title: "Reasonix",
+      status: "等待任务",
       phase: "idle",
       running: false,
       waiting: false,
@@ -1323,7 +1340,7 @@ export default function App() {
       selected.phase === "approval" ? "等待权限确认" :
       selected.phase === "input" ? "等待你的回复" :
       selected.running ? "正在处理任务" :
-      "等待任务";
+      selected.status;
     void app.UpdateDesktopPetState({
       title: selected.title,
       status,
@@ -1336,7 +1353,7 @@ export default function App() {
       updatedAt: Date.now(),
       sessions,
     }).catch(() => undefined);
-  }, [activeTabId, state.approval, state.ask, state.running, tabMetas]);
+  }, [activeTabId, state.approval, state.ask, state.items, state.running, tabMetas]);
   const composerSessionKey = useMemo(() => {
     return composerDraftKeyForTab(activeTab, activeTabId);
   }, [activeTab, activeTabId]);
@@ -1726,7 +1743,8 @@ export default function App() {
       if (petCommand) {
         const command = petCommand[1] ?? "show";
         try {
-          if (command === "show") await app.StartDesktopPet();
+          if (command === "show") await app.SetDesktopPetEnabled(true);
+          else if (command === "hide" || command === "close") await app.SetDesktopPetEnabled(false);
           else await app.SendDesktopPetCommand(command);
           notice(command === "show" || command === "expand" ? "桌宠已显示" : command === "collapse" ? "桌宠状态已收起" : "桌宠已隐藏");
         } catch (err) {

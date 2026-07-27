@@ -134,7 +134,7 @@ export interface AppBindings {
     activeCount: number;
     attentionCount: number;
     updatedAt: number;
-    sessions: Array<{ tabId: string; title: string; phase: string; running: boolean; waiting: boolean }>;
+    sessions: Array<{ tabId: string; title: string; status: string; phase: string; running: boolean; waiting: boolean }>;
   }): Promise<void>;
   ConsumeDesktopPetOpenRequest(): Promise<string>;
   ListDesktopPetPacks(): Promise<Array<{
@@ -146,6 +146,8 @@ export interface AppBindings {
     assetUrl?: string;
   }>>;
   DesktopPetPreference(): Promise<string>;
+  DesktopPetEnabled(): Promise<boolean>;
+  SetDesktopPetEnabled(enabled: boolean): Promise<void>;
   SetDesktopPetPreference(id: string): Promise<void>;
   // ── Heartbeat ──
   HeartbeatListTasks(): Promise<unknown>;
@@ -1514,6 +1516,12 @@ function makeMockApp(): AppBindings {
     },
     async DesktopPetPreference() {
       return "akita";
+    },
+    async DesktopPetEnabled() {
+      return true;
+    },
+    async SetDesktopPetEnabled() {
+      return;
     },
     async SetDesktopPetPreference() {
       return;

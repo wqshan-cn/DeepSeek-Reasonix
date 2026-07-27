@@ -24,6 +24,7 @@ const desktopPetArg = "--desktop-pet"
 type DesktopPetSession struct {
 	TabID   string `json:"tabId"`
 	Title   string `json:"title"`
+	Status  string `json:"status"`
 	Phase   string `json:"phase"`
 	Running bool   `json:"running"`
 	Waiting bool   `json:"waiting"`
@@ -60,7 +61,8 @@ type desktopPetManifest struct {
 }
 
 type desktopPetPreferences struct {
-	PetID string `json:"petId"`
+	PetID   string `json:"petId"`
+	Enabled bool   `json:"enabled"`
 }
 
 type DesktopPetApp struct {
@@ -154,6 +156,22 @@ func (a *App) DesktopPetPreference() string {
 	return readDesktopPetPreferences().PetID
 }
 
+func (a *App) DesktopPetEnabled() bool {
+	return readDesktopPetPreferences().Enabled
+}
+
+func (a *App) SetDesktopPetEnabled(enabled bool) error {
+	prefs := readDesktopPetPreferences()
+	prefs.Enabled = enabled
+	if err := writeDesktopPetJSON(desktopPetPreferencesPath(), prefs); err != nil {
+		return err
+	}
+	if enabled {
+		return a.StartDesktopPet()
+	}
+	return a.SendDesktopPetCommand("close")
+}
+
 func (a *App) SetDesktopPetPreference(id string) error {
 	id = strings.TrimSpace(id)
 	found := false
@@ -166,7 +184,9 @@ func (a *App) SetDesktopPetPreference(id string) error {
 	if !found {
 		return fmt.Errorf("unknown desktop pet %q", id)
 	}
-	return writeDesktopPetJSON(desktopPetPreferencesPath(), desktopPetPreferences{PetID: id})
+	prefs := readDesktopPetPreferences()
+	prefs.PetID = id
+	return writeDesktopPetJSON(desktopPetPreferencesPath(), prefs)
 }
 
 func (a *App) ConsumeDesktopPetOpenRequest() string {
@@ -185,7 +205,7 @@ func (a *App) ConsumeDesktopPetOpenRequest() string {
 }
 
 func readDesktopPetPreferences() desktopPetPreferences {
-	prefs := desktopPetPreferences{PetID: "akita"}
+	prefs := desktopPetPreferences{PetID: "akita", Enabled: true}
 	data, err := os.ReadFile(desktopPetPreferencesPath())
 	if err == nil {
 		_ = json.Unmarshal(data, &prefs)
@@ -376,7 +396,7 @@ func runDesktopPet() {
 		Windows: &windows.Options{
 			Theme:                             windows.SystemDefault,
 			WebviewIsTransparent:              true,
-			WindowIsTranslucent:               true,
+			WindowIsTranslucent:               false,
 			DisableFramelessWindowDecorations: true,
 			WebviewUserDataPath:               desktopPetWebviewDataPath(),
 			WindowClassName:                   "ReasonixDesktopPet",
