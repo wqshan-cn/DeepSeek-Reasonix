@@ -122,6 +122,8 @@ export interface AppBindings {
   ToggleMaximiseMainWindow(): Promise<void>;
   IsMainWindowMaximised(): Promise<boolean>;
   CloseMainWindow(): Promise<void>;
+  StartDesktopPet(): Promise<void>;
+  UpdateDesktopPetState(state: { title: string; status: string; running: boolean; waiting: boolean }): Promise<void>;
   // ── Heartbeat ──
   HeartbeatListTasks(): Promise<unknown>;
   HeartbeatReloadTasks(): Promise<unknown>;
@@ -1471,6 +1473,12 @@ function makeMockApp(): AppBindings {
     },
     async CloseMainWindow() {
       console.info("mock CloseMainWindow");
+    },
+    async StartDesktopPet() {
+      console.info("mock StartDesktopPet");
+    },
+    async UpdateDesktopPetState() {
+      return;
     },
     async Platform() {
       const override = browserPlatformOverride();

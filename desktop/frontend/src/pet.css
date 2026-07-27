@@ -1,0 +1,137 @@
+:root,
+html,
+body,
+#pet-root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: transparent !important;
+  font-family: "Segoe UI Variable", "Microsoft YaHei UI", sans-serif;
+}
+
+button {
+  font: inherit;
+}
+
+.pet-stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  user-select: none;
+  --wails-draggable: drag;
+}
+
+.pet-bubble {
+  position: absolute;
+  top: 14px;
+  left: 20px;
+  width: 416px;
+  min-height: 70px;
+  padding: 14px 22px;
+  border: 1px solid rgb(255 255 255 / 70%);
+  border-radius: 36px;
+  background: linear-gradient(145deg, rgb(255 255 255 / 96%), rgb(235 240 249 / 92%));
+  color: #182033;
+  display: grid;
+  gap: 5px;
+  text-align: left;
+  box-shadow: 0 12px 34px rgb(20 35 70 / 25%);
+  cursor: pointer;
+  --wails-draggable: no-drag;
+}
+
+.pet-bubble strong,
+.pet-bubble span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pet-bubble strong {
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.pet-bubble__status {
+  color: #8a93a5;
+  font-size: 13px;
+}
+
+.pet-bubble__status--waiting {
+  color: #d97706;
+}
+
+.pet-character {
+  position: absolute;
+  right: 10px;
+  bottom: -6px;
+  width: 150px;
+  height: 166px;
+  filter: drop-shadow(0 12px 12px rgb(15 25 55 / 30%));
+  transform-origin: 50% 100%;
+}
+
+.pet-character--running {
+  animation: pet-working 1.7s ease-in-out infinite;
+}
+
+.pet-character__button {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  --wails-draggable: no-drag;
+}
+
+.pet-character img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pet-actions {
+  position: absolute;
+  right: 0;
+  top: 96px;
+  display: grid;
+  gap: 6px;
+  --wails-draggable: no-drag;
+}
+
+.pet-actions button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 80%);
+  border-radius: 50%;
+  background: rgb(249 251 255 / 94%);
+  color: #2d3850;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 18px rgb(20 35 70 / 24%);
+  cursor: pointer;
+}
+
+.pet-action--collapsed {
+  transform: rotate(180deg);
+}
+
+.pet-stage--collapsed .pet-character {
+  right: 160px;
+}
+
+@keyframes pet-working {
+  50% {
+    transform: translateY(-7px) rotate(-1.5deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pet-character--running {
+    animation: none;
+  }
+}

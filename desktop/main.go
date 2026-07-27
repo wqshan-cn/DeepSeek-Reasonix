@@ -90,6 +90,10 @@ func linuxWebviewGpuPolicy(pattern string) linux.WebviewGpuPolicy {
 }
 
 func main() {
+	if hasDesktopPetArg(os.Args[1:]) {
+		runDesktopPet()
+		return
+	}
 	app := NewApp()
 
 	// Restore saved window size, or fall back to the default.

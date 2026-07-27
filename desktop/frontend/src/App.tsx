@@ -30,6 +30,7 @@ import {
   Trash2,
   AlarmClock,
   Brain,
+  Cat,
   Cpu,
   Palette,
   X,
@@ -227,6 +228,15 @@ function WindowsWindowControls() {
 
   return (
     <div className="windows-window-controls" aria-label="Window controls">
+      <button
+        className="windows-window-control windows-window-control--pet"
+        type="button"
+        aria-label="Open desktop pet"
+        title="打开桌宠"
+        onClick={() => void app.StartDesktopPet()}
+      >
+        <Cat size={13} strokeWidth={1.9} />
+      </button>
       <button
         className="windows-window-control windows-window-control--minimize"
         type="button"
@@ -1282,6 +1292,13 @@ export default function App() {
     () => tabMetas.find((tab) => tab.id === activeTabId) ?? tabMetas.find((tab) => tab.active),
     [activeTabId, tabMetas],
   );
+  useEffect(() => {
+    const waiting = Boolean(state.pendingPrompt);
+    const running = Boolean(state.running);
+    const title = activeTab?.topicTitle || activeTab?.label || activeTab?.workspaceName || "Reasonix";
+    const status = waiting ? "等待你的确认" : running ? "正在处理任务" : "任务已完成";
+    void app.UpdateDesktopPetState({ title, status, running, waiting }).catch(() => undefined);
+  }, [activeTab?.label, activeTab?.topicTitle, activeTab?.workspaceName, state.pendingPrompt, state.running]);
   const composerSessionKey = useMemo(() => {
     return composerDraftKeyForTab(activeTab, activeTabId);
   }, [activeTab, activeTabId]);

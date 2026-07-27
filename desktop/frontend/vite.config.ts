@@ -126,6 +126,10 @@ export default defineConfig({
       keep_fnames: true,
     },
     rolldownOptions: {
+      input: {
+        main: resolve(configDir, "index.html"),
+        pet: resolve(configDir, "pet.html"),
+      },
       output: {
         // Manual chunk splitting: keep the heavy markdown/math/code pipeline
         // in a separate chunk so it can be cached independently from the
