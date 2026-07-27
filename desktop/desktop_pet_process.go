@@ -46,6 +46,14 @@ func desktopPetStatePath() string {
 	return filepath.Join(base, "Reasonix", "desktop-pet-state.json")
 }
 
+func desktopPetWebviewDataPath() string {
+	base, err := os.UserCacheDir()
+	if err != nil || strings.TrimSpace(base) == "" {
+		base = os.TempDir()
+	}
+	return filepath.Join(base, "Reasonix", "desktop-pet-webview2")
+}
+
 func (a *App) StartDesktopPet() error {
 	executable, err := os.Executable()
 	if err != nil {
@@ -161,6 +169,7 @@ func runDesktopPet() {
 			WebviewIsTransparent:               true,
 			WindowIsTranslucent:                true,
 			DisableFramelessWindowDecorations: true,
+			WebviewUserDataPath:               desktopPetWebviewDataPath(),
 			WindowClassName:                    "ReasonixDesktopPet",
 		},
 	})
