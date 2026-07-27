@@ -5426,8 +5426,23 @@ function AppearanceSection({
 }) {
   const t = useT();
   const themeOptions: Theme[] = ["auto", "light", "dark"];
+  const [desktopPetPacks, setDesktopPetPacks] = useState<Array<{ id: string; displayName: string; description: string }>>([]);
+  const [desktopPetID, setDesktopPetID] = useState("akita");
   const availableFontFamilies = useMemo(() => getAvailableFontFamilies(fontFamily), [fontFamily]);
   const availableMonoFontFamilies = useMemo(() => getAvailableMonoFontFamilies(monoFontFamily), [monoFontFamily]);
+  useEffect(() => {
+    let cancelled = false;
+    void Promise.all([app.ListDesktopPetPacks(), app.DesktopPetPreference()])
+      .then(([packs, selected]) => {
+        if (cancelled) return;
+        setDesktopPetPacks(packs);
+        setDesktopPetID(selected || "akita");
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   return (
     <SettingsSection title={t("settings.appearance")}>
       <SettingsField label={t("settings.theme")}>
@@ -5441,6 +5456,35 @@ function AppearanceSection({
               {themeName(opt, t)}
             </button>
           ))}
+        </div>
+      </SettingsField>
+      <SettingsField label="桌宠（Pets）" stacked>
+        <div className="theme-card-grid">
+          {desktopPetPacks.map((pet) => (
+            <button
+              key={pet.id}
+              type="button"
+              role="radio"
+              aria-checked={desktopPetID === pet.id}
+              className={`theme-card${desktopPetID === pet.id ? " theme-card--on" : ""}`}
+              onClick={() => {
+                setDesktopPetID(pet.id);
+                void app.SetDesktopPetPreference(pet.id)
+                  .then(() => app.StartDesktopPet())
+                  .catch(() => undefined);
+              }}
+            >
+              <span className="theme-card__head">
+                <span className="theme-card__name">{pet.displayName}</span>
+                <span className="theme-card__tag">{pet.id === "akita" ? "内置动画" : "自定义宠物包"}</span>
+              </span>
+              <span className="theme-card__desc">{pet.description}</span>
+              <span className="theme-card__check" aria-hidden="true"><Check size={13} strokeWidth={3} /></span>
+            </button>
+          ))}
+        </div>
+        <div className="set-hint">
+          自定义宠物可放入 Reasonix 配置目录的 pets/&lt;宠物ID&gt;/，包含 pet.json 与 spritesheet.webp。
         </div>
       </SettingsField>
       <SettingsField label={t("settings.themeStyle")} stacked>

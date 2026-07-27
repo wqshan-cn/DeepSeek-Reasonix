@@ -1293,12 +1293,50 @@ export default function App() {
     [activeTabId, tabMetas],
   );
   useEffect(() => {
-    const waiting = Boolean(state.pendingPrompt);
-    const running = Boolean(state.running);
-    const title = activeTab?.topicTitle || activeTab?.label || activeTab?.workspaceName || "Reasonix";
-    const status = waiting ? "等待你的确认" : running ? "正在处理任务" : "任务已完成";
-    void app.UpdateDesktopPetState({ title, status, running, waiting }).catch(() => undefined);
-  }, [activeTab?.label, activeTab?.topicTitle, activeTab?.workspaceName, state.pendingPrompt, state.running]);
+    const sessions = tabMetas.map((tab) => {
+      const isActive = tab.id === activeTabId || tab.active;
+      const approval = isActive && Boolean(state.approval);
+      const input = isActive && Boolean(state.ask);
+      const waiting = approval || input || Boolean(tab.pendingPrompt);
+      const running = isActive ? Boolean(state.running) : Boolean(tab.running);
+      const phase = approval ? "approval" : input || waiting ? "input" : running ? "working" : "idle";
+      return {
+        tabId: tab.id,
+        title: tab.topicTitle || tab.label || tab.workspaceName || "Reasonix",
+        phase,
+        running,
+        waiting,
+      };
+    });
+    const priority = (session: (typeof sessions)[number]) =>
+      session.phase === "approval" ? 5 : session.phase === "input" ? 4 : session.running ? 3 : session.tabId === activeTabId ? 2 : 1;
+    const selected = [...sessions].sort((left, right) => priority(right) - priority(left))[0] ?? {
+      tabId: activeTabId || "",
+      title: "Reasonix",
+      phase: "idle",
+      running: false,
+      waiting: false,
+    };
+    const activeCount = sessions.filter((session) => session.running).length;
+    const attentionCount = sessions.filter((session) => session.waiting).length;
+    const status =
+      selected.phase === "approval" ? "等待权限确认" :
+      selected.phase === "input" ? "等待你的回复" :
+      selected.running ? "正在处理任务" :
+      "等待任务";
+    void app.UpdateDesktopPetState({
+      title: selected.title,
+      status,
+      phase: selected.phase,
+      tabId: selected.tabId,
+      running: selected.running,
+      waiting: selected.waiting,
+      activeCount,
+      attentionCount,
+      updatedAt: Date.now(),
+      sessions,
+    }).catch(() => undefined);
+  }, [activeTabId, state.approval, state.ask, state.running, tabMetas]);
   const composerSessionKey = useMemo(() => {
     return composerDraftKeyForTab(activeTab, activeTabId);
   }, [activeTab, activeTabId]);
@@ -1682,6 +1720,18 @@ export default function App() {
       if (trimmed === "/memory") {
         closeTransientOverlays();
         setSettingsTarget("memory");
+        return;
+      }
+      const petCommand = /^\/pet(?:\s+(show|hide|close|collapse|expand))?$/.exec(trimmed.toLowerCase());
+      if (petCommand) {
+        const command = petCommand[1] ?? "show";
+        try {
+          if (command === "show") await app.StartDesktopPet();
+          else await app.SendDesktopPetCommand(command);
+          notice(command === "show" || command === "expand" ? "桌宠已显示" : command === "collapse" ? "桌宠状态已收起" : "桌宠已隐藏");
+        } catch (err) {
+          showToast(err instanceof Error ? err.message : String(err), "error");
+        }
         return;
       }
       if (trimmed === "/clear") {
@@ -2191,6 +2241,23 @@ export default function App() {
     void enqueueTabSwitch(id, selected);
     setTabRevealSignal((signal) => signal + 1);
   }, [closeTransientOverlays, enqueueTabSwitch, tabMetas]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const consume = () => {
+      void app.ConsumeDesktopPetOpenRequest().then((tabId) => {
+        if (!cancelled && tabId && tabMetas.some((tab) => tab.id === tabId)) {
+          handleTabChange(tabId);
+        }
+      }).catch(() => undefined);
+    };
+    consume();
+    const timer = window.setInterval(consume, 500);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [handleTabChange, tabMetas]);
 
   const handleTabClose = useCallback(async (id: string) => {
     closeTransientOverlays();

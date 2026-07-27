@@ -1,0 +1,14 @@
+Akita animation attribution
+
+The Akita animation files are redistributed unchanged from VS Code Pets:
+https://github.com/tonybaloney/vscode-pets
+
+The Akita Inu media assets were created by Kevin Huang:
+https://github.com/kevin2huang
+
+The dog media directory is licensed under Creative Commons
+Attribution-NoDerivatives 4.0 International:
+https://creativecommons.org/licenses/by-nd/4.0/
+
+No animation frame or artwork has been modified. Reasonix only selects among
+the original GIF files according to the current task state.

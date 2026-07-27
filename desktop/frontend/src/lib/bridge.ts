@@ -123,7 +123,30 @@ export interface AppBindings {
   IsMainWindowMaximised(): Promise<boolean>;
   CloseMainWindow(): Promise<void>;
   StartDesktopPet(): Promise<void>;
-  UpdateDesktopPetState(state: { title: string; status: string; running: boolean; waiting: boolean }): Promise<void>;
+  SendDesktopPetCommand(command: string): Promise<void>;
+  UpdateDesktopPetState(state: {
+    title: string;
+    status: string;
+    phase: string;
+    tabId: string;
+    running: boolean;
+    waiting: boolean;
+    activeCount: number;
+    attentionCount: number;
+    updatedAt: number;
+    sessions: Array<{ tabId: string; title: string; phase: string; running: boolean; waiting: boolean }>;
+  }): Promise<void>;
+  ConsumeDesktopPetOpenRequest(): Promise<string>;
+  ListDesktopPetPacks(): Promise<Array<{
+    id: string;
+    displayName: string;
+    description: string;
+    kind: string;
+    builtIn: boolean;
+    assetUrl?: string;
+  }>>;
+  DesktopPetPreference(): Promise<string>;
+  SetDesktopPetPreference(id: string): Promise<void>;
   // ── Heartbeat ──
   HeartbeatListTasks(): Promise<unknown>;
   HeartbeatReloadTasks(): Promise<unknown>;
@@ -1477,7 +1500,22 @@ function makeMockApp(): AppBindings {
     async StartDesktopPet() {
       console.info("mock StartDesktopPet");
     },
+    async SendDesktopPetCommand() {
+      return;
+    },
     async UpdateDesktopPetState() {
+      return;
+    },
+    async ConsumeDesktopPetOpenRequest() {
+      return "";
+    },
+    async ListDesktopPetPacks() {
+      return [{ id: "akita", displayName: "Akita", description: "Animated Akita", kind: "gif-set", builtIn: true }];
+    },
+    async DesktopPetPreference() {
+      return "akita";
+    },
+    async SetDesktopPetPreference() {
       return;
     },
     async Platform() {
