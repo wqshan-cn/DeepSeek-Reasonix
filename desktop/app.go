@@ -134,6 +134,9 @@ type App struct {
 	backgroundMaximised atomic.Bool
 	trayReady           bool
 	tray                *desktopTray
+	desktopPetMu        sync.Mutex
+	desktopPetActive    bool
+	desktopPetWindow    desktopPetWindowState
 
 	mediaTokens *mediaTokenStore
 	botInstalls map[string]*botInstallSession

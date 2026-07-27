@@ -30,6 +30,7 @@ import {
   Trash2,
   AlarmClock,
   Brain,
+  Cat,
   Cpu,
   Palette,
   X,
@@ -200,7 +201,7 @@ type HistoryScopeFilter = { scope: "global" | "project"; workspaceRoot: string }
 type WorkspaceInsertTarget = "composer" | "planRevision";
 type DesktopPlatform = "darwin" | "windows" | "linux";
 
-function WindowsWindowControls() {
+function WindowsWindowControls({ onEnterDesktopPet }: { onEnterDesktopPet: () => void }) {
   const [maximised, setMaximised] = useState(false);
 
   const syncMaximised = useCallback(() => {
@@ -227,6 +228,15 @@ function WindowsWindowControls() {
 
   return (
     <div className="windows-window-controls" aria-label="Window controls">
+      <button
+        className="windows-window-control windows-window-control--pet"
+        type="button"
+        aria-label="Desktop pet"
+        title="Desktop pet"
+        onClick={onEnterDesktopPet}
+      >
+        <Cat size={13} strokeWidth={1.9} />
+      </button>
       <button
         className="windows-window-control windows-window-control--minimize"
         type="button"
@@ -1038,6 +1048,7 @@ export default function App() {
   const transientOverlayDismissSignal = useOverlayStore((s) => s.transientOverlayDismissSignal);
   const setTransientOverlayDismissSignal = useOverlayStore((s) => s.setTransientOverlayDismissSignal);
   const [desktopPlatform, setDesktopPlatform] = useState<DesktopPlatform>(detectBrowserPlatform);
+  const [desktopPetMode, setDesktopPetMode] = useState(false);
   const [statusBarStyle, setStatusBarStyle] = useState<"icon" | "text">("text");
   const [statusBarItems, setStatusBarItems] = useState<StatusBarItemId[]>(() => [...DEFAULT_STATUS_BAR_ITEMS]);
   const [renamingTopicId, setRenamingTopicId] = useState<string | null>(null);
@@ -2850,6 +2861,12 @@ export default function App() {
   const topicbarTitleEditSize = Math.min(56, Math.max(4, topicTitleDraft.length || topicbarTitle.length || 1));
   const sidebarWorkbench = desktopLayoutStyle === "workbench";
   const windowsFramelessChrome = desktopPlatform === "windows";
+  const enterDesktopPet = useCallback(() => {
+    void app.EnterDesktopPet().then(() => setDesktopPetMode(true));
+  }, []);
+  const exitDesktopPet = useCallback(() => {
+    void app.ExitDesktopPet().then(() => setDesktopPetMode(false));
+  }, []);
   const handleWindowsTitlebarDoubleClick = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
     if (!windowsFramelessChrome) return;
     const target = event.target as HTMLElement | null;
@@ -2867,6 +2884,26 @@ export default function App() {
     sidebarCollapsed ? "sidebar--collapsed" : "",
     sidebarWorkbench ? "sidebar--workbench" : "",
   ].filter(Boolean).join(" ");
+
+  if (desktopPetMode) {
+    const petTitle = activeTab?.topicTitle || activeTab?.label || activeTab?.workspaceName || "Reasonix";
+    const petStatus = state.pendingPrompt
+      ? "等待你的确认"
+      : state.running
+        ? "正在处理任务"
+        : "任务已完成";
+    return (
+      <button className="desktop-pet" type="button" onClick={exitDesktopPet} title="点击返回对话">
+        <span className={`desktop-pet__avatar${state.running ? " desktop-pet__avatar--running" : ""}`}>
+          <Cat size={25} strokeWidth={1.8} />
+        </span>
+        <span className="desktop-pet__copy">
+          <strong>{petTitle}</strong>
+          <span>{petStatus} · 点击返回对话</span>
+        </span>
+      </button>
+    );
+  }
 
   return (
     <ShellExpandProvider>
@@ -3735,7 +3772,7 @@ export default function App() {
       <HeartbeatPanel open={heartbeatOpen} onClose={() => setHeartbeatOpen(false)} onOpenTopic={(scope, workspaceRoot, topicId) => {
         void handleOpenTopic(scope, workspaceRoot, topicId);
       }} />
-      {windowsFramelessChrome && <WindowsWindowControls />}
+      {windowsFramelessChrome && <WindowsWindowControls onEnterDesktopPet={enterDesktopPet} />}
     </div>
     </ShellExpandProvider>
   );
