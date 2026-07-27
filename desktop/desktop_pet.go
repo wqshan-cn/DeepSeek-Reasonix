@@ -3,8 +3,10 @@ package main
 import "github.com/wailsapp/wails/v2/pkg/runtime"
 
 const (
-	desktopPetWidth  = 360
-	desktopPetHeight = 84
+	desktopPetWidth    = 360
+	desktopPetHeight   = 84
+	mainWindowMinWidth  = 760
+	mainWindowMinHeight = 480
 )
 
 type desktopPetWindowState struct {
@@ -35,6 +37,7 @@ func (a *App) EnterDesktopPet() {
 
 	runtime.WindowUnmaximise(a.ctx)
 	runtime.WindowSetAlwaysOnTop(a.ctx, true)
+	runtime.WindowSetMinSize(a.ctx, desktopPetWidth, desktopPetHeight)
 	runtime.WindowSetSize(a.ctx, desktopPetWidth, desktopPetHeight)
 	if screens, err := runtime.ScreenGetAll(a.ctx); err == nil && len(screens) > 0 {
 		screen := screens[0]
@@ -61,6 +64,7 @@ func (a *App) ExitDesktopPet() {
 	state := a.desktopPetWindow
 	a.desktopPetActive = false
 	runtime.WindowSetAlwaysOnTop(a.ctx, false)
+	runtime.WindowSetMinSize(a.ctx, mainWindowMinWidth, mainWindowMinHeight)
 	if state.width > 0 && state.height > 0 {
 		runtime.WindowSetSize(a.ctx, state.width, state.height)
 	}
