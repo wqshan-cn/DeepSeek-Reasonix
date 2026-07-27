@@ -276,6 +276,7 @@ func (p *DesktopPetApp) domReady(context.Context) {
 	if p.ctx == nil {
 		return
 	}
+	enableDesktopPetTransparency()
 	if screens, err := wailsruntime.ScreenGetAll(p.ctx); err == nil && len(screens) > 0 {
 		screen := screens[0]
 		wailsruntime.WindowSetPosition(
@@ -377,7 +378,7 @@ func runDesktopPet() {
 		Frameless:        true,
 		DisableResize:    true,
 		AlwaysOnTop:      true,
-		BackgroundColour: &options.RGBA{R: 0, G: 0, B: 0, A: 0},
+		BackgroundColour: &options.RGBA{R: desktopPetTransparencyR, G: desktopPetTransparencyG, B: desktopPetTransparencyB, A: 255},
 		AssetServer: &assetserver.Options{
 			Assets:     assets,
 			Middleware: desktopPetAssetMiddleware,
@@ -396,8 +397,7 @@ func runDesktopPet() {
 		Windows: &windows.Options{
 			Theme:                             windows.SystemDefault,
 			WebviewIsTransparent:              true,
-			WindowIsTranslucent:               true,
-			BackdropType:                      windows.None,
+			WindowIsTranslucent:               false,
 			DisableFramelessWindowDecorations: true,
 			WebviewUserDataPath:               desktopPetWebviewDataPath(),
 			WindowClassName:                   "ReasonixDesktopPet",

@@ -42,9 +42,25 @@ button { font: inherit; }
 }
 
 .pet-status-card--single {
+  top: 76px;
+  right: 132px;
+  left: auto;
   width: fit-content;
   min-width: 238px;
   max-width: 350px;
+}
+
+.pet-status-card--single::after {
+  content: "";
+  position: absolute;
+  right: 34px;
+  bottom: -8px;
+  width: 18px;
+  height: 18px;
+  border-right: 1px solid #e7ebf3;
+  border-bottom: 1px solid #e7ebf3;
+  background: #f8faff;
+  transform: rotate(45deg);
 }
 
 .pet-status-card__copy {
@@ -94,8 +110,9 @@ button { font: inherit; }
 
 .pet-card-stack {
   position: absolute;
-  top: 12px;
-  left: 14px;
+  top: 76px;
+  right: 188px;
+  left: auto;
   width: 310px;
   height: 88px;
   --wails-draggable: no-drag;
@@ -110,6 +127,19 @@ button { font: inherit; }
   transform: translate(var(--stack-x), var(--stack-y)) scale(var(--stack-scale));
   transform-origin: top left;
   transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+}
+
+.pet-status-card--stacked:first-child::after {
+  content: "";
+  position: absolute;
+  right: 28px;
+  bottom: -8px;
+  width: 18px;
+  height: 18px;
+  border-right: 1px solid #e7ebf3;
+  border-bottom: 1px solid #e7ebf3;
+  background: #f8faff;
+  transform: rotate(45deg);
 }
 
 .pet-status-card--approval,
