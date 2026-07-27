@@ -396,7 +396,8 @@ func runDesktopPet() {
 		Windows: &windows.Options{
 			Theme:                             windows.SystemDefault,
 			WebviewIsTransparent:              true,
-			WindowIsTranslucent:               false,
+			WindowIsTranslucent:               true,
+			BackdropType:                      windows.None,
 			DisableFramelessWindowDecorations: true,
 			WebviewUserDataPath:               desktopPetWebviewDataPath(),
 			WindowClassName:                   "ReasonixDesktopPet",

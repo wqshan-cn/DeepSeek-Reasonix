@@ -25,11 +25,10 @@ button { font: inherit; }
   position: absolute;
   top: 12px;
   left: 14px;
-  width: 438px;
-  min-height: 72px;
-  padding: 13px 22px;
+  min-height: 62px;
+  padding: 10px 18px;
   border: 1px solid #e7ebf3;
-  border-radius: 36px;
+  border-radius: 30px;
   background: #f8faff;
   color: #182033;
   display: grid;
@@ -42,10 +41,21 @@ button { font: inherit; }
   --wails-draggable: no-drag;
 }
 
+.pet-status-card--single {
+  width: fit-content;
+  min-width: 238px;
+  max-width: 350px;
+}
+
 .pet-status-card__copy {
   min-width: 0;
   display: grid;
   gap: 4px;
+}
+
+.pet-status-card--single .pet-status-card__copy {
+  width: max-content;
+  max-width: 278px;
 }
 
 .pet-status-card strong,
@@ -86,17 +96,17 @@ button { font: inherit; }
   position: absolute;
   top: 12px;
   left: 14px;
-  width: 330px;
-  height: 96px;
+  width: 310px;
+  height: 88px;
   --wails-draggable: no-drag;
 }
 .pet-card-stack:hover,
-.pet-card-stack:focus-within { height: 218px; }
+.pet-card-stack:focus-within { height: 198px; }
 
 .pet-status-card--stacked {
   top: 0;
   left: 0;
-  width: 320px;
+  width: 300px;
   transform: translate(var(--stack-x), var(--stack-y)) scale(var(--stack-scale));
   transform-origin: top left;
   transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;

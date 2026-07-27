@@ -163,7 +163,7 @@ function DesktopPet() {
               style={{
                 ["--stack-x" as string]: `${index * 8}px`,
                 ["--stack-y" as string]: `${index * 11}px`,
-                ["--stack-open-y" as string]: `${index * 73}px`,
+                ["--stack-open-y" as string]: `${index * 66}px`,
                 ["--stack-scale" as string]: 1 - index * 0.025,
                 ["--stack-open-scale" as string]: 1 - index * 0.015,
                 zIndex: sessionStack.items.length - index,
