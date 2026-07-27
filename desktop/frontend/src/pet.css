@@ -21,98 +21,98 @@ button { font: inherit; }
   --wails-draggable: drag;
 }
 
-.pet-bubble {
+.pet-status-card {
   position: absolute;
   top: 12px;
   left: 14px;
   width: 438px;
   min-height: 72px;
-  padding: 0;
-  border: 1px solid rgb(255 255 255 / 78%);
-  border-radius: 38px;
-  background: linear-gradient(145deg, rgb(255 255 255 / 97%), rgb(237 242 251 / 94%));
+  padding: 13px 22px;
+  border: 1px solid #e7ebf3;
+  border-radius: 36px;
+  background: #f8faff;
   color: #182033;
   display: grid;
+  grid-template-columns: 9px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
   text-align: left;
   box-shadow: 0 14px 38px rgb(20 35 70 / 27%);
+  cursor: pointer;
   --wails-draggable: no-drag;
 }
-.pet-bubble--multi { width: 330px; }
 
-.pet-bubble__primary {
-  width: 100%;
-  min-height: 70px;
-  padding: 14px 24px;
-  border: 0;
-  border-radius: inherit;
-  background: transparent;
-  color: inherit;
+.pet-status-card__copy {
+  min-width: 0;
   display: grid;
   gap: 4px;
-  text-align: left;
-  cursor: pointer;
 }
 
-.pet-bubble strong,
-.pet-bubble span,
-.pet-bubble small {
+.pet-status-card strong,
+.pet-status-card__status {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.pet-bubble strong { font-size: 15px; line-height: 1.2; }
-.pet-bubble__status { color: #788399; font-size: 13px; }
-.pet-bubble small { color: #9aa2b2; font-size: 11px; }
-.pet-stage--approval .pet-bubble__status,
-.pet-stage--input .pet-bubble__status { color: #d97706; }
-.pet-stage--error .pet-bubble__status { color: #dc2626; }
-.pet-stage--done .pet-bubble__status { color: #059669; }
-
-.pet-task-list {
-  display: grid;
-  padding: 0 12px 10px;
-}
-
-.pet-task {
-  min-width: 0;
-  height: 31px;
-  padding: 0 10px;
-  border: 0;
-  border-top: 1px solid rgb(92 108 138 / 12%);
-  background: transparent;
-  color: #4b5568;
-  display: grid;
-  grid-template-columns: 8px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  text-align: left;
-}
-
-.pet-task:hover { background: rgb(98 116 150 / 7%); }
-.pet-task__dot {
-  width: 7px;
-  height: 7px;
+.pet-status-card strong { font-size: 14px; line-height: 1.2; }
+.pet-status-card__status { color: #788399; font-size: 12px; }
+.pet-status-card__dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #9ca3af;
 }
-.pet-task--working .pet-task__dot,
-.pet-task--thinking .pet-task__dot { background: #3b82f6; animation: pet-dot-pulse 1s ease-in-out infinite; }
-.pet-task--approval .pet-task__dot,
-.pet-task--input .pet-task__dot { background: #f59e0b; animation: pet-dot-pulse .72s ease-in-out infinite; }
-.pet-task--done .pet-task__dot { background: #10b981; }
-.pet-task--error .pet-task__dot { background: #ef4444; }
-.pet-task__title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 12px;
-}
-.pet-task__status {
-  color: #8a93a5;
+.pet-status-card__dot--working,
+.pet-status-card__dot--thinking { background: #3b82f6; animation: pet-dot-pulse 1s ease-in-out infinite; }
+.pet-status-card__dot--approval,
+.pet-status-card__dot--input { background: #f59e0b; animation: pet-dot-pulse .72s ease-in-out infinite; }
+.pet-status-card__dot--done { background: #10b981; }
+.pet-status-card__dot--error { background: #ef4444; }
+.pet-status-card__overflow {
+  min-width: 28px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 12px;
+  background: #e9eef8;
+  color: #56627a;
+  display: grid;
+  place-items: center;
   font-size: 11px;
-  white-space: nowrap;
+  font-weight: 700;
+}
+
+.pet-card-stack {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  width: 330px;
+  height: 96px;
+  --wails-draggable: no-drag;
+}
+.pet-card-stack:hover,
+.pet-card-stack:focus-within { height: 218px; }
+
+.pet-status-card--stacked {
+  top: 0;
+  left: 0;
+  width: 320px;
+  transform: translate(var(--stack-x), var(--stack-y)) scale(var(--stack-scale));
+  transform-origin: top left;
+  transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+}
+
+.pet-status-card--approval,
+.pet-status-card--input { border-color: #f5d8a3; }
+.pet-status-card--working,
+.pet-status-card--thinking { border-color: #cfe0ff; }
+.pet-status-card--error { border-color: #f5bebe; }
+.pet-status-card--done { border-color: #c8eadc; }
+
+.pet-card-stack:hover .pet-status-card--stacked,
+.pet-card-stack:focus-within .pet-status-card--stacked {
+  transform: translate(0, var(--stack-open-y)) scale(var(--stack-open-scale));
+  box-shadow: 0 10px 26px rgb(20 35 70 / 20%);
 }
 
 .pet-character {

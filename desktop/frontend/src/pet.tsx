@@ -124,7 +124,7 @@ function DesktopPet() {
 
   const phase = celebrating ? "done" : normalizePhase(state);
   const pack = useMemo(() => packs.find((item) => item.id === state.petId) ?? packs[0], [packs, state.petId]);
-  const visibleSessions = useMemo(() => {
+  const sessionStack = useMemo(() => {
     const priority = (session: PetSession) =>
       session.phase === "approval" ? 6 :
       session.phase === "input" ? 5 :
@@ -134,43 +134,54 @@ function DesktopPet() {
     const relevant = (state.sessions ?? []).filter(
       (session) => session.running || session.waiting || session.tabId === state.tabId,
     );
-    return [...relevant]
-      .sort((left, right) => priority(right) - priority(left))
-      .slice(0, 3);
+    const ordered = [...relevant].sort((left, right) => priority(right) - priority(left));
+    return {
+      items: ordered.slice(0, 3),
+      overflow: Math.max(0, ordered.length - 3),
+    };
   }, [state.sessions, state.tabId]);
   const openMain = (tabId = state.tabId ?? "") => void bindings()?.OpenMainWindow(tabId);
 
   return (
     <main className={`pet-stage pet-stage--${phase}${collapsed ? " pet-stage--collapsed" : ""}`}>
-      {!collapsed && (
-        <section className={`pet-bubble${visibleSessions.length > 1 ? " pet-bubble--multi" : ""}`} aria-label="Reasonix 任务状态">
-          <button className="pet-bubble__primary" type="button" onClick={() => openMain()} title="点击返回当前对话">
+      {!collapsed && sessionStack.items.length <= 1 && (
+        <button className="pet-status-card pet-status-card--single" type="button" onClick={() => openMain()} title="点击返回当前对话">
+          <span className={`pet-status-card__dot pet-status-card__dot--${phase}`} aria-hidden="true" />
+          <span className="pet-status-card__copy">
             <strong>{state.title || "Reasonix"}</strong>
-            <span className="pet-bubble__status">{state.status || "等待任务"}</span>
-            {((state.activeCount ?? 0) > 1 || (state.attentionCount ?? 0) > 0) && (
-              <small>
-                {state.activeCount ?? 0} 个任务进行中
-                {(state.attentionCount ?? 0) > 0 ? ` · ${state.attentionCount} 个需要处理` : ""}
-              </small>
-            )}
-          </button>
-          {visibleSessions.length > 1 && (
-            <div className="pet-task-list">
-              {visibleSessions.map((session) => (
-                <button
-                  key={session.tabId}
-                  className={`pet-task pet-task--${session.phase}`}
-                  type="button"
-                  onClick={() => openMain(session.tabId)}
-                  title={`打开：${session.title}`}
-                >
-                  <span className="pet-task__dot" aria-hidden="true" />
-                  <span className="pet-task__title">{session.title}</span>
-                  <span className="pet-task__status">{session.status}</span>
-                </button>
-              ))}
-            </div>
-          )}
+            <span className="pet-status-card__status">{state.status || "等待任务"}</span>
+          </span>
+        </button>
+      )}
+
+      {!collapsed && sessionStack.items.length > 1 && (
+        <section className="pet-card-stack" aria-label="Reasonix 多任务状态">
+          {sessionStack.items.map((session, index) => (
+            <button
+              key={session.tabId}
+              className={`pet-status-card pet-status-card--stacked pet-status-card--${session.phase}`}
+              style={{
+                ["--stack-x" as string]: `${index * 8}px`,
+                ["--stack-y" as string]: `${index * 11}px`,
+                ["--stack-open-y" as string]: `${index * 73}px`,
+                ["--stack-scale" as string]: 1 - index * 0.025,
+                ["--stack-open-scale" as string]: 1 - index * 0.015,
+                zIndex: sessionStack.items.length - index,
+              }}
+              type="button"
+              onClick={() => openMain(session.tabId)}
+              title={`打开：${session.title}`}
+            >
+              <span className={`pet-status-card__dot pet-status-card__dot--${session.phase}`} aria-hidden="true" />
+              <span className="pet-status-card__copy">
+                <strong>{session.title}</strong>
+                <span className="pet-status-card__status">{session.status}</span>
+              </span>
+              {index === 0 && sessionStack.overflow > 0 && (
+                <span className="pet-status-card__overflow">+{sessionStack.overflow}</span>
+              )}
+            </button>
+          ))}
         </section>
       )}
 
